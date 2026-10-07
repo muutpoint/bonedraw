@@ -1,0 +1,97 @@
+{
+  "name": "bonedraw",
+  "version": "1.0.0",
+  "description": "Procedural skeletons for animals that don't exist: generate, animate and render them as line art, X-ray or cleared-and-stained specimens.",
+  "author": "Ro Mayz",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "vendor": "node scripts/vendor.js",
+    "dist:mac": "electron-builder --mac dmg --arm64 --x64",
+    "dist:win": "electron-builder --win nsis --x64",
+    "test": "node tools/check-wild.js && node tools/check-base.js"
+  },
+  "devDependencies": {
+    "@fontsource/space-grotesk": "^5.2.10",
+    "electron": "^44.6.0",
+    "electron-builder": "^26.15.3",
+    "gifenc": "^1.0.3",
+    "mp4-muxer": "^5.2.2"
+  },
+  "build": {
+    "appId": "com.muutpoint.bonedraw",
+    "productName": "bonedraw",
+    "copyright": "\u00a9 Ro Mayz 2026. All rights reserved.",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "style.css",
+      "package.json",
+      "src/**/*",
+      "assets/**/*",
+      "vendor/**/*",
+      "build/icon.png",
+      "!**/*.map"
+    ],
+    "asar": true,
+    "mac": {
+      "category": "public.app-category.graphics-design",
+      "icon": "build/icon.png",
+      "identity": null,
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "bonedraw-${version}-mac-${arch}.${ext}"
+    },
+    "dmg": {
+      "title": "bonedraw ${version}",
+      "iconSize": 104,
+      "window": {
+        "width": 560,
+        "height": 360
+      },
+      "contents": [
+        {
+          "x": 150,
+          "y": 170
+        },
+        {
+          "x": 410,
+          "y": 170,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "bonedraw-${version}-win-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
+    },
+    "afterPack": "scripts/adhoc-sign.js"
+  }
+}
