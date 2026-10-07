@@ -1,0 +1,203 @@
+/* bonedraw — minimal, techy, a little sci-fi */
+/* Space Grotesk (SIL Open Font License) ships with the app. Telegraf is used instead when it's installed. */
+@font-face { font-family: 'Telegraf'; src: local('Telegraf'), local('Telegraf Regular'), local('Telegraf-Regular'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Telegraf'; src: local('Telegraf UltraBold'), local('Telegraf-UltraBold'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Space Grotesk'; src: url('assets/fonts/space-grotesk-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Space Grotesk'; src: url('assets/fonts/space-grotesk-500.woff2') format('woff2'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Space Grotesk'; src: url('assets/fonts/space-grotesk-600.woff2') format('woff2'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Space Grotesk'; src: url('assets/fonts/space-grotesk-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+
+:root {
+  --page: #ffffff;
+  --paper: #fbf8f0;
+  --ink: #1f1e1c;
+  --soft: #6b6a66;
+  --line: #e4e2dd;
+  --lav: #d79ded;          /* hints, values, effects */
+  --lav-deep: #b56fd0;
+  --gear: #9c998b;
+  --sans: 'Telegraf', 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font: 15px/1.4 var(--sans);
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select { font: inherit; color: inherit; }
+::selection { background: var(--lav); color: #fff; }
+
+/* ------------------------------------------------------------ header */
+header { display: flex; align-items: center; justify-content: flex-start; gap: 40px; padding: 18px 40px 6px; flex-wrap: wrap; }
+.sub { color: var(--lav); letter-spacing: 0.01em; }
+#modes { display: flex; gap: 10px; }
+#modes button {
+  background: none; border: 1.5px solid transparent; border-radius: 3px; padding: 4px 14px; cursor: pointer; font-size: 17px;
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+}
+#modes button.on { border-color: var(--ink); background: #fbfaf6; box-shadow: inset 0 0 0 1px #fff, 0 1px 0 rgba(0,0,0,.05); }
+#modes button:not(.on):hover { border-color: var(--line); }
+
+/* the Humanoid toggle: a pill with the smiler that inverts when it's let loose */
+.toggle { display: inline-flex; align-items: center; gap: 8px; border: 1.5px dashed var(--ink); border-radius: 20px; padding: 4px 14px 4px 6px; font-size: 15px; background: #fff; }
+.toggle img { width: 22px; height: 22px; display: block; transition: transform .5s var(--ease), filter .3s; }
+.toggle:hover img { transform: rotate(-20deg); }
+.toggle.on { background: var(--ink); color: #fff; border-style: solid; box-shadow: 0 0 0 3px rgba(215,157,237,.45); }
+.toggle.on img { filter: invert(1); transform: rotate(360deg); }
+.toggle.on:hover { background: #000; }
+
+/* ------------------------------------------------------------ stage */
+main { flex: 1; display: flex; min-height: 0; }
+#stage {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 26px 40px 18px; overflow: auto; gap: 22px;
+}
+#drawing { position: relative; flex: none; width: min(100%, calc(100vh - 250px)); aspect-ratio: 1; }
+#drawing canvas { width: 100%; height: 100%; display: block; position: relative; z-index: 1; }
+/* heavy corner brackets, top right and bottom left */
+#drawing::before, #drawing::after {
+  content: ""; position: absolute; z-index: 2; pointer-events: none; border: 0 solid var(--ink);
+  transition: width .5s var(--ease), height .5s var(--ease);
+}
+#drawing::before { top: -18px; right: -18px; width: 14%; height: 28%; border-top-width: 8px; border-right-width: 8px; }
+#drawing::after { bottom: -18px; left: -18px; width: 14%; height: 28%; border-bottom-width: 8px; border-left-width: 8px; }
+#drawing.pulse::before, #drawing.pulse::after { width: 20%; height: 34%; }
+/* the scan line that sweeps a new specimen in */
+#scan {
+  position: absolute; left: 0; right: 0; top: 0; height: 18%; z-index: 3; pointer-events: none; opacity: 0;
+  background: linear-gradient(180deg, rgba(215,157,237,0) 0%, rgba(215,157,237,.16) 70%, rgba(181,111,208,.8) 99%, rgba(255,255,255,.9) 100%);
+}
+#scan.go { animation: scan .62s var(--ease) forwards; }
+@keyframes scan { 0% { top: -18%; opacity: 1; } 85% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+.brand { display: flex; flex-direction: column; align-items: center; gap: 6px; user-select: none; }
+.brand img { width: clamp(180px, 22vw, 300px); height: auto; display: block; }
+.brand .copy { font-size: 17px; letter-spacing: 0.01em; }
+
+#grid {
+  width: 100%; max-width: 1200px; align-self: flex-start;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;
+}
+#grid .cell { aspect-ratio: 1; background: var(--paper); cursor: pointer; position: relative; outline: 1.5px solid transparent; transition: outline-color .2s; }
+#grid .cell:hover { outline-color: var(--ink); }
+#grid .cell canvas { width: 100%; height: 100%; display: block; }
+#grid .cell.pending::after { content: "···"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--lav); letter-spacing: .3em; }
+#grid .more { grid-column: 1 / -1; justify-self: center; }
+
+/* ------------------------------------------------------------ panel */
+#panel { width: 380px; flex: none; border-left: 1px solid var(--line); overflow-y: auto; padding: 10px 0 40px; }
+.block { padding: 18px 22px; border-bottom: 1px solid var(--line); }
+summary { cursor: pointer; display: flex; align-items: center; gap: 8px; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: ""; width: 7px; height: 7px; border-right: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); transform: rotate(-45deg); transition: transform .25s var(--ease); margin-right: 2px; }
+details[open] > summary::before { transform: rotate(45deg); }
+.hint { color: var(--lav); margin: 8px 0 0; line-height: 1.35; }
+
+.seedrow { display: flex; gap: 10px; }
+.seedrow input { flex: 1; min-width: 0; padding: 7px 10px; border: 1.5px solid var(--line); border-radius: 3px; background: #fff; transition: border-color .2s; }
+.seedrow input:focus { outline: none; border-color: var(--lav); }
+button { background: #fff; border: 1.5px solid var(--line); border-radius: 3px; padding: 6px 12px; cursor: pointer; position: relative; transition: border-color .15s, background .15s, transform .12s var(--ease); white-space: nowrap; }
+button:hover { border-color: var(--ink); }
+button:active { transform: translateY(1px) scale(.98); }
+button.primary { background: var(--ink); color: #fff; border-color: var(--ink); min-width: 70px; }
+button.primary:hover { background: #000; }
+button.wide { width: 100%; margin-top: 10px; padding: 10px; }
+button.link { background: none; border: none; color: var(--lav); padding: 0; margin-left: auto; }
+button.link:hover { color: var(--lav-deep); }
+button:disabled { opacity: .5; cursor: default; }
+#prev { width: 40px; padding: 0; }
+
+.rows { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; }
+.row { display: grid; grid-template-columns: 118px 1fr 46px; align-items: center; gap: 10px; min-height: 30px; }
+.row .lbl { color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row output { text-align: right; color: var(--lav); font-variant-numeric: tabular-nums; transition: color .3s; }
+.row output.hot { color: var(--lav-deep); }
+.row select, .row input[type="number"] {
+  grid-column: 2 / 4; padding: 6px 28px 6px 8px; border: 1.5px solid var(--line); border-radius: 3px; background-color: #fff; min-width: 0;
+  appearance: none; -webkit-appearance: none; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%), linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%; background-size: 5px 5px; background-repeat: no-repeat;
+  transition: border-color .2s;
+}
+.row input[type="number"] { background-image: none; padding-right: 8px; cursor: text; }
+.row select:hover { border-color: var(--ink); }
+.row select:focus { outline: none; border-color: var(--lav); }
+.seg { grid-column: 2 / 4; display: flex; }
+.seg button { flex: 1; border-radius: 0; }
+.seg button:first-child { border-radius: 3px 0 0 3px; }
+.seg button:last-child { border-radius: 0 3px 3px 0; border-left: none; }
+.seg button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+#sizeRow { grid-template-columns: 118px 1fr 1fr; }
+
+.btnrow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.btnrow button { padding: 6px 4px; font-size: 13px; }
+.namerow { display: flex; gap: 8px; }
+.namerow input { flex: 1; min-width: 0; padding: 6px 9px; border: 1.5px solid var(--lav); border-radius: 3px; }
+.namerow input:focus { outline: none; border-color: var(--lav-deep); }
+.row select optgroup { color: var(--soft); }
+/* export progress: a thin bar with a moving scan tick */
+.progress { height: 6px; border: 1.5px solid var(--ink); border-radius: 6px; overflow: hidden; background: #fafafa; }
+.progress > div { height: 100%; width: 0; background: linear-gradient(90deg, #050505, var(--lav)); transition: width .15s linear; }
+
+/* checkboxes: a square that fills in */
+input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; width: 20px; height: 20px; margin: 0; justify-self: start;
+  border: 1.5px solid var(--ink); border-radius: 4px; cursor: pointer; position: relative; background: #fff;
+}
+input[type="checkbox"]::after { content: ""; position: absolute; inset: 3px; border-radius: 1px; background: var(--ink); transform: scale(0); transition: transform .22s var(--ease); }
+input[type="checkbox"]:checked::after { transform: scale(1); }
+
+/* sliders: a gradient that fills up to the knob, and a gear knob that turns with the value */
+input[type="range"] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 36px; margin: 0; background: transparent; cursor: pointer;
+  --f: 0.5; --rot: 0deg; --k: 34px;
+}
+input[type="range"]:focus { outline: none; }
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 9px; border: 1.5px solid #111; border-radius: 9px;
+  background: linear-gradient(90deg, #050505, #d4d4d4) 0 0 / calc(var(--f) * (100% - var(--k)) + var(--k) / 2) 100% no-repeat, #fafafa;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: var(--k); height: var(--k); margin-top: calc((6px - var(--k)) / 2); border: none; border-radius: 50%;
+  background: url('assets/knob.svg') center / contain no-repeat; transform: rotate(var(--rot));
+  transition: transform .18s var(--ease), filter .2s;
+}
+input[type="range"]:hover::-webkit-slider-thumb { filter: drop-shadow(0 0 3px rgba(215,157,237,.8)); }
+input[type="range"]:active::-webkit-slider-thumb { transform: rotate(var(--rot)) scale(1.22); filter: drop-shadow(0 0 5px rgba(215,157,237,1)); }
+input[type="range"]::-moz-range-track { height: 6px; border: 1.5px solid #111; border-radius: 9px; background: #fafafa; }
+input[type="range"]::-moz-range-progress { height: 6px; border: 1.5px solid #111; border-radius: 9px; background: linear-gradient(90deg, #050505, #d4d4d4); }
+input[type="range"]::-moz-range-thumb { width: var(--k); height: var(--k); border: none; background: url('assets/knob.svg') center / contain no-repeat; transform: rotate(var(--rot)); transition: transform .18s var(--ease); }
+input[type="range"]:active::-moz-range-thumb { transform: rotate(var(--rot)) scale(1.22); }
+
+#paramGroups details { margin-top: 12px; }
+#paramGroups .rows { margin: 10px 0 2px 14px; }
+.param .lbl { cursor: default; }
+.param.changed .lbl { cursor: pointer; }
+.param.changed .lbl::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 6px; background: var(--lav); vertical-align: middle; animation: blink 1.6s steps(2) infinite; }
+@keyframes blink { 50% { opacity: .35; } }
+.row.layer .lbl { padding-left: 10px; color: var(--soft); }
+
+/* ------------------------------------------------------------ interaction effects */
+.ping {
+  position: fixed; z-index: 50; pointer-events: none; width: 8px; height: 8px; margin: -4px 0 0 -4px;
+  border: 1.5px solid var(--lav); animation: ping .45s var(--ease) forwards;
+}
+@keyframes ping { to { transform: scale(5) rotate(45deg); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+@media (max-width: 860px) {
+  header { padding: 14px 16px 4px; gap: 14px; }
+  main { flex-direction: column; overflow-y: auto; }
+  #stage { flex: none; padding: 20px 16px; }
+  #panel { width: auto; border-left: none; border-top: 1px solid var(--line); overflow: visible; }
+  #drawing { width: calc(100% - 16px); }
+}

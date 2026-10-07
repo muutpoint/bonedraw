@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>bonedraw</title>
+  <link rel="icon" href="assets/smiler.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <nav id="modes" aria-label="Mode">
+      <button data-mode="anatomical" class="on" title="Skeletons that hold together">Anatomical</button>
+      <button data-mode="wild" title="The first, unruly build: curved bodies tear discs and shells into shards, armour balloons">Wild</button>
+    </nav>
+    <button id="humanoid" class="toggle" aria-pressed="false" title="Let the smiler humanoid into the pool. Once it's in, weirdness spreads its skull, arms and legs to other creatures."><img src="assets/smiler.svg" alt=""><span class="t">Humanoid</span></button>
+    <span class="sub">procedural skeletons for animals that don't exist</span>
+  </header>
+
+  <main>
+    <section id="stage">
+      <div id="drawing"><canvas id="cv" aria-label="Skeleton drawing"></canvas><div id="scan"></div></div>
+      <div id="grid" hidden></div>
+      <footer class="brand">
+        <img src="assets/logo.png" alt="bonedraw">
+        <div class="copy">&copy; Ro Mayz 2026</div>
+      </footer>
+    </section>
+
+    <aside id="panel">
+      <div class="block">
+        <div class="seedrow">
+          <input id="seed" spellcheck="false" autocomplete="off" aria-label="Seed (any text)">
+          <button id="prev" title="Previous specimen (←)" aria-label="Previous">&lsaquo;</button>
+          <button id="next" class="primary" title="New specimen (space or →)">New</button>
+        </div>
+        <p class="hint">Type any word as a seed. Same seed, same skeleton.</p>
+      </div>
+
+      <details class="block" id="presetBlock" open>
+        <summary>Presets</summary>
+        <div class="rows">
+          <div class="row">
+            <label class="lbl" for="presetSel">Preset</label>
+            <select id="presetSel"></select>
+          </div>
+          <div class="btnrow">
+            <button id="presetSave" title="Save everything as it is now under a name">Save as…</button>
+            <button id="presetDel" title="Delete the selected saved preset">Delete</button>
+            <button id="presetImport" title="Load presets from a .json file">Import</button>
+            <button id="presetExport" title="Download the selected preset, or the current settings, as a .json file">Export</button>
+          </div>
+          <div class="namerow" id="presetNameRow" hidden>
+            <input id="presetName" maxlength="60" placeholder="Name this preset" spellcheck="false">
+            <button id="presetOk" class="primary">Save</button>
+          </div>
+          <div class="row">
+            <label class="lbl" for="presetSeed" title="Save the current seed too, so the preset brings back this exact creature">Keep seed</label>
+            <input type="checkbox" id="presetSeed">
+            <span></span>
+          </div>
+          <p class="hint" id="presetHint">A preset holds the mode, Humanoid, style, look, weirdness, movement and every locked parameter.</p>
+        </div>
+        <input type="file" id="presetFile" accept=".json,application/json" multiple hidden>
+      </details>
+
+      <div class="block rows">
+        <div class="row">
+          <span class="lbl">View</span>
+          <div class="seg" id="view">
+            <button data-view="single" class="on">Single</button>
+            <button data-view="grid">Grid</button>
+          </div>
+        </div>
+        <div class="row">
+          <label class="lbl" for="weird">Weirdness</label>
+          <input type="range" id="weird" min="0" max="1" step="0.01" value="0.5">
+          <output id="weirdOut">0.50</output>
+        </div>
+        <p class="hint">Low: plausible animals. Middle: hybrids. High: monsters.</p>
+        <div class="row">
+          <label class="lbl" for="styleMode">Style</label>
+          <select id="styleMode">
+            <option value="plate">Line art</option>
+            <option value="specimen">Specimen (white on black)</option>
+            <option value="xray">X-ray</option>
+            <option value="cleared">Cleared &amp; stained</option>
+          </select>
+        </div>
+        <div id="lookRows" class="rows"></div>
+        <div class="row">
+          <label class="lbl" for="labelMode">Label</label>
+          <select id="labelMode">
+            <option value="name">Latin name</option>
+            <option value="seed">Seed</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <div class="row">
+          <label class="lbl" for="showRig">Show rig</label>
+          <input type="checkbox" id="showRig">
+          <span></span>
+        </div>
+        <p class="hint" id="rigInfo"></p>
+      </div>
+
+      <details class="block" id="motionBlock" open>
+        <summary>Motion <button id="play" class="link" title="Play / pause (p)">pause</button></summary>
+        <div class="rows">
+          <div class="row">
+            <label class="lbl" for="mPreset">Movement</label>
+            <select id="mPreset"></select>
+          </div>
+          <p class="hint" id="mHint"></p>
+          <div class="row">
+            <label class="lbl" for="mMaster">Intensity</label>
+            <input type="range" id="mMaster" min="0" max="1.5" step="0.01">
+            <output id="mMasterOut"></output>
+          </div>
+          <div class="row">
+            <label class="lbl" for="mSpeed">Speed</label>
+            <input type="range" id="mSpeed" min="0.05" max="3" step="0.01">
+            <output id="mSpeedOut"></output>
+          </div>
+          <div id="mLayers" class="rows"></div>
+          <div class="row">
+            <label class="lbl" for="mBodyWaves" title="How many waves fit along the body">Body waves</label>
+            <input type="range" id="mBodyWaves" min="0.2" max="3" step="0.01">
+            <output id="mBodyWavesOut"></output>
+          </div>
+          <div class="row">
+            <label class="lbl" for="mFinWaves" title="Ripples across a disc, front to back. 0 beats the whole disc together.">Fin waves</label>
+            <input type="range" id="mFinWaves" min="0" max="3" step="0.01">
+            <output id="mFinWavesOut"></output>
+          </div>
+          <div class="row">
+            <label class="lbl" for="mShape" title="Left: only the tail swings (swimming). Right: the whole body waves (slithering).">Wave shape</label>
+            <input type="range" id="mShape" min="0" max="1" step="0.01">
+            <output id="mShapeOut"></output>
+          </div>
+          <div class="row">
+            <label class="lbl" for="mRange" title="Scales every joint's limits. Above 1 lets joints bend further than they should.">Joint range</label>
+            <input type="range" id="mRange" min="0.2" max="2.5" step="0.01">
+            <output id="mRangeOut"></output>
+          </div>
+        </div>
+      </details>
+
+      <details class="block" id="paramsBlock" open>
+        <summary>Parameters <button id="resetAll" class="link" title="Clear every change you made">reset all</button></summary>
+        <div id="paramGroups"></div>
+      </details>
+
+      <details class="block" id="exportBlock" open>
+        <summary>Export</summary>
+        <div class="rows">
+          <div class="row">
+            <label class="lbl" for="fmt">Format</label>
+            <select id="fmt">
+              <option value="png">PNG (still)</option>
+              <option value="svg">SVG (still)</option>
+              <option value="mp4">MP4 video (loop)</option>
+              <option value="gif">GIF (loop)</option>
+              <option value="json">Rig (JSON)</option>
+            </select>
+          </div>
+          <div class="row" id="sizeRow">
+            <label class="lbl" for="size">Size</label>
+            <select id="size"></select>
+          </div>
+          <div class="row" id="bgRow">
+            <label class="lbl" for="bg">Background</label>
+            <select id="bg">
+              <option value="style">Style's own</option>
+              <option value="">Transparent</option>
+            </select>
+          </div>
+          <div class="row" id="fpsRow" hidden>
+            <label class="lbl" for="fps">Frame rate</label>
+            <select id="fps"></select>
+          </div>
+          <div class="row" id="loopsRow" hidden>
+            <label class="lbl" for="loops">Loops</label>
+            <select id="loops">
+              <option value="1">1 (seamless, set it to repeat)</option>
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="8">8</option>
+            </select>
+          </div>
+          <div class="row" id="qualityRow" hidden>
+            <label class="lbl" for="vq">Quality</label>
+            <select id="vq">
+              <option value="standard">Standard</option>
+              <option value="high" selected>High</option>
+              <option value="max">Maximum</option>
+            </select>
+          </div>
+          <button id="download" class="primary wide">Download</button>
+          <div class="progress" id="progress" hidden><div></div></div>
+          <p class="hint" id="exportHint"></p>
+        </div>
+      </details>
+    </aside>
+  </main>
+
+  <script src="src/rng.js"></script>
+  <script src="src/geom.js"></script>
+  <script src="src/species.js"></script>
+  <script src="src/names.js"></script>
+  <script src="src/rig.js"></script>
+  <script src="src/parts.js"></script>
+  <script src="src/draw.js"></script>
+  <script src="src/creature.js"></script>
+  <script src="src/motion.js"></script>
+  <script src="src/post.js"></script>
+  <script src="src/bonedraw.js"></script>
+  <script src="src/export.js"></script>
+  <script src="src/app.js"></script>
+  <script src="src/fx.js"></script>
+</body>
+</html>
