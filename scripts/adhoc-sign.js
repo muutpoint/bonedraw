@@ -5,6 +5,8 @@ const { execFileSync } = require('child_process');
 const path = require('path');
 exports.default = async function (context) {
   if (context.electronPlatformName !== 'darwin') return;
+  // a universal build packs an x64 and an arm64 copy first and merges them; only the merged app gets signed
+  if (/-temp$/.test(context.appOutDir)) return;
   const app = path.join(context.appOutDir, context.packager.appInfo.productFilename + '.app');
   execFileSync('codesign', ['--force', '--deep', '--sign', '-', '--timestamp=none', app], { stdio: 'inherit' });
   execFileSync('codesign', ['--verify', '--deep', '--strict', app], { stdio: 'inherit' });

@@ -27,8 +27,9 @@ an image, a video, a looping GIF or the rig itself.
 
 ## Get it
 
-**Mac:** download the `.dmg` for your Mac (Apple Silicon: `mac-arm64`, Intel:
-`mac-x64`) from the releases page, open it and drag **bonedraw** to Applications.
+**Mac:** download `bonedraw-<version>-mac-universal.dmg` from the releases page, open it
+and drag **bonedraw** to Applications. It's a universal app, so it runs natively on both
+Apple Silicon and Intel Macs.
 The app isn't notarised by Apple, so the first time you open it, right-click it,
 choose **Open**, and confirm. If macOS says the app is damaged, run
 `xattr -cr /Applications/bonedraw.app` once.

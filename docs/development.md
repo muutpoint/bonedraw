@@ -18,7 +18,7 @@ index.html, style.css   the page
 main.js                 the desktop app shell (Electron)
 assets/                 logo, smiler, gear knob, Space Grotesk
 vendor/                 mp4-muxer and gifenc, copied from node_modules (npm run vendor)
-build/icon.png          the app icon
+build/icon.png          the app icon, made from build/icon-art.png by scripts/icon.py
 src/rng.js              seeded random numbers and noise
 src/geom.js             curves, polygons, fields
 src/species.js          parameter validation and the weirdness mutator
@@ -79,7 +79,7 @@ packaged by [electron-builder](https://www.electron.build/). Settings are in the
 section of `package.json`.
 
 ```
-npm run dist:mac      # dist/bonedraw-<version>-mac-arm64.dmg and -mac-x64.dmg  (needs a Mac)
+npm run dist:mac      # dist/bonedraw-<version>-mac-universal.dmg               (needs a Mac)
 npm run dist:win      # dist/bonedraw-<version>-win-x64.exe                     (needs Windows)
 ```
 
